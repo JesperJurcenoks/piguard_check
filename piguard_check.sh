@@ -168,7 +168,7 @@ function check_tunnel() {
     else
         echo "ssh tunnel is not running"
         echo "attempting restart of tunnel"
-        ssh -fN -R $1:localport:22 $2@$3
+        ssh -fN -R $1:localhost:22 $2@$3
         echo "tunnel up"
     fi
 }
