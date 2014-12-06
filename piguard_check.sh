@@ -163,12 +163,12 @@ function check_connectivity() {
 function check_tunnel() {
     # perform check
     echo "Performing service running check for ssh tunnel"
-    if ps aux | grep -q "ssh -fN -R" | grep -v grep; then
+    if ps aux | grep -v grep | grep -q "ssh -fN -R"; then
         echo "ssh tunnel is running"
     else
         echo "ssh tunnel is not running"
         echo "attempting restart of tunnel"
-        ssh -fN -R $2:localport:22 $3@$4
+        ssh -fN -R $1:localport:22 $2@$3
         echo "tunnel up"
     fi
 }
