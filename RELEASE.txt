@@ -1,0 +1,17 @@
++	# Release Notes for piguard_check.sh
++	
++	## v1.1 - 2014/12/05
++	_Jesper Jurcenoks_
++
++   * Name change to piguard_check.sh to align with official new name of our raspberry pi product
++   * Added the extension .sh to script to signal that this is a script
++   * This version replaces all previous versions of raspguard_check and dhcp_check
++   * Added functionality to check debug tunnel 
++
++	## v1.0 - 2014/04/25 as raspguard_check
++	_Jesper Jurcenoks_
++	
++	* Inital version to be included in the neighborhood Repo
++   * Previous version was dhcp_guard v1.0
++    * This new rapguard_check completely replaces dhcp_guard and expand the functionality to include Wifi and Lan checks as well.
++    * This version determines Internet Connection be trying to reach www.google.com and as such will not work in countries where access to Google is blocked (like main land China)
