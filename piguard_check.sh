@@ -16,7 +16,7 @@
 # GNU Affero General Public License for more details.
 # 
 # You should have received a copy of the GNU Affero General Public License
-# along with CommunityView.  If not, see <http://www.gnu.org/licenses/>.
+# along with piguard_check.  If not, see <http://www.gnu.org/licenses/>.
 #
 ################################################################################
 # 
@@ -29,10 +29,10 @@
 #
 # Purpose:
 #
-# Check various known error conditions on Raspberry Pi seen in connection with 
+# Check various known error conditions on Raspberry Pi seen in connection with
 # the PiGuard Setup and try to fix them.
 # This is not a perfect solution, ideally we should find the root cause for the
-# problems in the first place (proactive) instead of trying to fix them after 
+# problems in the first place (proactive) instead of trying to fix them after
 # failure - but honesty right now this is all we have resources to do.
 #
 # Specific Problem 1
@@ -46,35 +46,37 @@
 # renew their dhcp lease
 #
 # Specific Problem 2
-# 
+#
 # Wifi or lan interface is down in such a way that there is no IP address assigned
 # to the interface, bounce the interface.
 #
 # Specific Problem 3
 #
-# Sheck that SSH tunnel for remote debug is running and bring it up if tunnel is down.
+# Check if ftp_upload is running and restart it if is not.
 #
 # Uses a lock file which prevents the script from running more
 # than one at a time.  If lockfile is old, it removes it
 #
 # Instructions:
 #
-# o Install where you want to run it from like /usr/local/bin
-# o chmod +x /usr/local/bin/piguard_check
+# o Install where you want to run it from like ~/ftp_upload
+# o chmod +x ~/ftp_upload/piguard_check.sh
 # o Add to crontab
 #
-# Run Every 5 mins 
+# Run 1 min after boot and then every 5 min
 # Note sudo must be used on raspbian to execute in /usr/local/bin
 # so make sure you are usings sudo's crontab like this
-# 
+#
 # sudo crontab -e
 #
-# */5 * * * * /usr/local/bin/piguard_check 
+# @reboot  sleep 60 && ~/ftp_upload/piguard_check.sh
+# */5 * * * * /usr/local/bin/piguard_check.sh
 #
 ##################################################################
 # Settings
 # Where and what you want to call the Lockfile
-lockfile='/var/run/piguard_check.pid'
+HOMEDIR=~
+lockfile=$HOMEDIR'/ftp_upload/piguard_check.pid'
 ##################################################################
 echo
 echo "Starting piguard_check"
@@ -84,9 +86,9 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 function if_bounce() {
     echo "Network connection down! Attempting reconnection."
-    ifdown $1
+    sudo ifdown $1
     sleep 5
-    ifup --force $1
+    sudo ifup --force $1
     ifconfig $1 | grep "inet addr"
 }
 
@@ -109,8 +111,11 @@ function ip_address_check(){
 
 
 function check_create_lockfile() {
+    echo "lockfile name:$lockfile"
     # Check to see if there is a lock file
-    if [ -e $lockfile ]; then
+    if [ -e $lockfile ]
+    then
+        echo "lockfile found"
         # A lockfile exists... Lets check to see if it is still valid
         pid=`cat $lockfile`
         if kill -0 &>1 > /dev/null $pid; then
@@ -124,8 +129,9 @@ function check_create_lockfile() {
         fi
     fi
     # If we get here, set a lock file using our current PID#
-    #echo "Setting Lockfile"
-    echo $$ > $lockfile
+    echo "Setting Lockfile"
+    echo "$$" > $lockfile
+    echo "lockfile should be set now"
 }
 
 
@@ -142,9 +148,7 @@ function check_dhcp() {
         echo "attempting restart of dhcd"
         service isc-dhcp-server start
         echo "taking eth0 down and up to force dhcpclient to retry getting an ip address"
-        ifdown $eth
-        sleep 5
-        ifup --force $eth
+        ifbounce $eth
         ifconfig $eth | grep "inet addr"
     fi
 }
@@ -160,21 +164,7 @@ function check_connectivity() {
     fi
 }
 
-function check_tunnel() {
-    # perform check
-    echo "Performing service running check for ssh tunnel"
-    if ps aux | grep -v grep | grep -q "ssh -fN -R"; then
-        echo "ssh tunnel is running"
-    else
-        echo "ssh tunnel is not running"
-        echo "attempting restart of tunnel"
-        ssh -fN -R $1:localhost:22 $2@$3
-        echo "tunnel up"
-    fi
-}
-
-
-# Cheack Create Lock File
+# Check Create Lock File
 check_create_lockfile
 
 # Check Wifi ip address
@@ -191,9 +181,6 @@ check_connectivity wlan0 "www.google.com"
 
 # Check connectivity to camera 
 check_connectivity eth0 "10.19.12.2"
-
-# Check reverse tunnel - Use unique port for each PiGuard
-check_tunnel 54321 dreamhost_username video.yourneighborhood.org 
 
 # Check is complete, Remove Lock file and exit
 #echo "process is complete, removing lockfile"
