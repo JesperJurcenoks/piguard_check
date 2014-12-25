@@ -164,6 +164,16 @@ function check_connectivity() {
     fi
 }
 
+function check_python() {
+  if ps -A | grep -q python ; then
+    echo "python already running"
+  else
+    echo “starting python”
+    cd /home/pi/ftp_upload
+    python /home/pi/ftp_upload/ftp_upload.py > /dev/null 2>&1
+  fi
+}
+
 # Check Create Lock File
 check_create_lockfile
 
@@ -181,6 +191,9 @@ check_connectivity wlan0 "www.google.com"
 
 # Check connectivity to camera 
 check_connectivity eth0 "10.19.12.2"
+
+# check python is running
+check_python
 
 # Check is complete, Remove Lock file and exit
 #echo "process is complete, removing lockfile"
