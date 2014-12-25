@@ -146,7 +146,7 @@ function check_dhcp() {
     else
         echo "dhcpd not running"
         echo "attempting restart of dhcd"
-        service isc-dhcp-server start
+        sudo service isc-dhcp-server start
         echo "taking eth0 down and up to force dhcpclient to retry getting an ip address"
         ifbounce $eth
         ifconfig $eth | grep "inet addr"
