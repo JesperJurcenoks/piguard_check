@@ -168,9 +168,10 @@ function check_python() {
   if ps -A | grep -q python ; then
     echo "python already running"
   else
-    echo “starting python”
+    echo "starting python"
     cd /home/pi/ftp_upload
     python /home/pi/ftp_upload/ftp_upload.py > /dev/null 2>&1
+    echo "python started"
   fi
 }
 
