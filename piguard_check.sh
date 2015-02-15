@@ -170,10 +170,19 @@ function check_python() {
   else
     echo "starting python"
     cd /home/pi/ftp_upload
-    python /home/pi/ftp_upload/ftp_upload.py > /dev/null 2>&1
+    python /home/pi/ftp_upload/ftp_upload.py & > /dev/null 2>&1
     echo "python started"
   fi
 }
+
+function upload_heartbeat() {
+  echo "Upload Heartbeat info"
+  cd /home/pi/ftp_upload
+  python /home/pi/ftp_upload/ftp_upload.py -s
+  echo "heartbeat uploaded"
+
+}
+
 
 # Check Create Lock File
 check_create_lockfile
@@ -195,6 +204,9 @@ check_connectivity eth0 "10.19.12.2"
 
 # check python is running
 check_python
+
+# upload heartbeat
+upload_heartbeat
 
 # Check is complete, Remove Lock file and exit
 #echo "process is complete, removing lockfile"
