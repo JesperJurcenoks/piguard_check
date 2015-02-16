@@ -200,7 +200,7 @@ check_dhcp
 check_connectivity wlan0 "www.google.com"
 
 # Check connectivity to camera 
-check_connectivity eth0 "10.19.12.2"
+check_connectivity eth0 "camera"
 
 # check python is running
 check_python
